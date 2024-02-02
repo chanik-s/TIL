@@ -45,6 +45,8 @@
 uint8_t cur;
 uint8_t pre=1;
 uint8_t led_on=0; //1 off
+
+int swConfig=1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,22 +88,22 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  //MX_GPIO_Init();
+  MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
   //init
   //__HAL_RCC_GPIOC_CLK_ENABLE();
-  volatile unsigned int *reg=0x40021018;
-  *reg|=16;
+  //volatile unsigned int *reg=0x40021018;
+  //*reg|=16;
   // __HAL_RCC_GPIOA_CLK_ENABLE();
-  *reg|=4;
+  //*reg|=4;
  //*reg|=0x14;
 
 
 
   /*Configure GPIO pin Output Level */
   //GPIO_InitTypeDef GPIO_InitStruct = {0}; // 1<<13 , 1<<0 , 1<<1 , 0x3<<0
-  GPIO_InitTypeDef GPIO_InitStruct = {1<<13 , 1<<0 , 1<<1 , 0x3<<0};
+  //GPIO_InitTypeDef GPIO_InitStruct = {1<<13 , 1<<0 , 1<<1 , 0x3<<0};
 
   //HAL_GPIO_WritePin(GPIO_LED_GPIO_Port, GPIO_LED_Pin, GPIO_PIN_RESET);
   /*Configure GPIO pin : GPIO_LED_Pin */
@@ -110,64 +112,47 @@ int main(void)
   //GPIO_InitStruct.Pull = GPIO_PULLDOWN; //  0x00000002u
   //GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; //0x3UL <<0
   //HAL_GPIO_Init(GPIO_LED_GPIO_Port, &GPIO_InitStruct);
-  volatile unsigned int *reg2=0x40011004;
-  *reg2=(*reg2& ~(15UL<<20)) | (3UL<<20);
+  //volatile unsigned int *reg2=0x40011004;
+  //*reg2=(*reg2& ~(15UL<<20)) | (3UL<<20);
 
   /*Configure GPIO pin : GPIO_SW_Pin */
-    GPIO_InitStruct.Pin = 1;
-    GPIO_InitStruct.Mode = 0;
-    GPIO_InitStruct.Pull = 1;
+    //GPIO_InitStruct.Pin = 1;
+    //GPIO_InitStruct.Mode = 0;
+    //GPIO_InitStruct.Pull = 1;
     //HAL_GPIO_Init(GPIO_SW_GPIO_Port, &GPIO_InitStruct);
-    volatile unsigned int *regsw=&(GPIOA->CRL); //port A 0
-    *regsw=(*regsw&~(0xf)) | (0x8);
-    GPIOA->ODR=0x1; //pull up
+   // volatile unsigned int *regsw=&(GPIOA->CRL); //port A 0
+    //*regsw=(*regsw&~(0xf)) | (0x8);
+   // GPIOA->ODR=0x1; //pull up
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //unsigned int flag=0;
+
 
 
 
   while (1)
   {
-	  volatile unsigned int *reg3=(unsigned int *)0x40011010; //led
-	  //volatile unsigned int *regIDR= 0x40010808;
+	  //GPIOB->ODR=1<<6;
+	  //HAL_Delay(500);
+	  //GPIOB->ODR=1<<7;
+	  //HAL_Delay(500);
 
-	  //if(!HAL_GPIO_ReadPin(GPIO_SW_GPIO_Port, GPIO_SW_Pin)){
-	  if( !( (GPIOA->IDR)&1) ){
+	  swConfig=HAL_GPIO_ReadPin(PB0_SW1_GPIO_Port, PB0_SW1_Pin);
+	 // HAL_Delay(500);
+	  if(!swConfig){
+	  HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 0);
+	  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);
 
-		  *reg3=1ul<<13;
-	  	  //write 0
-		 }
-	  else{
-		  *reg3=1ul<<29; // sw on
-		  //write 1
 	  }
-	  /*
-	  //HAL_GPIO_WritePin(GPIO_LED_GPIO_Port, GPIO_LED_Pin, 1);//off
-	  //pinstate=0;
+	  else{
+	  HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 1);
+	  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 0);
+
+	  }
 
 
-	  volatile unsigned int *reg3=0x40011010;
-	  //volatile unsigned int *reg3=0x40011000;
-	  *reg3=1ul<<13;
-	  HAL_Delay(500);
-
-	  *reg3=1ul<<29;
-	  HAL_Delay(500);
-	  //HAL_GPIO_WritePin(GPIO_LED_GPIO_Port, GPIO_LED_Pin, 0); //on
-	  //pinstate=1;
-	  //reg3= pinstate!=0 ? 0x2000 : 0x2000<<16u;
-
-
-	  volatile unsigned int *reg4=0x4001100C; //ODR
-	  *reg4=1ul<<13;
-	  HAL_Delay(500);
-	  *reg4=0;
-	  HAL_Delay(500);
-	 */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -225,9 +210,13 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_LED_GPIO_Port, GPIO_LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, PB6_LED1_Pin|PB7_LED2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : GPIO_LED_Pin */
   GPIO_InitStruct.Pin = GPIO_LED_Pin;
@@ -241,6 +230,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIO_SW_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB0_SW1_Pin */
+  GPIO_InitStruct.Pin = PB0_SW1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(PB0_SW1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB6_LED1_Pin PB7_LED2_Pin */
+  GPIO_InitStruct.Pin = PB6_LED1_Pin|PB7_LED2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
