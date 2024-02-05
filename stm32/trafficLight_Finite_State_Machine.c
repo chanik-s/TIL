@@ -48,7 +48,7 @@
 
 uint8_t pre=1;
 uint8_t flag=0;
-uint8_t state_=GREEN;
+uint8_t state_=0;
 uint8_t swConfig=1;
 /* USER CODE END PV */
 
@@ -160,6 +160,7 @@ int main(void)
 				  break;
 			  default:
 				  state_=BLINK;
+				  break;
 		  }
 	  }
 	  pre=swConfig;
@@ -168,16 +169,20 @@ int main(void)
 	  switch(state_){
 	  	 case RED:
 	  		//GPIOB->ODR=1<<6;
-	  		HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 0); //red on
-	  		HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);//blue off
+	  		 GPIOB->BSRR=GPIO_PIN_6<<16;
+	  		 GPIOB->BSRR=GPIO_PIN_7;
+	  		//HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 0); //red on
+	  		//HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);//blue off
 	  		 	 break;
 	  	case GREEN:
 	  		//GPIOB->ODR=1<<7;
-	  		HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 0);//blue on
-	  		HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 1); //red off
+	  		GPIOB->BSRR=GPIO_PIN_6;
+	  		GPIOB->BSRR=GPIO_PIN_7<<16;
+	  		//HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 0);//blue on
+	  		//HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 1); //red off
 	  			break;
 	  	case BLINK:
-	  		state_=RED;
+
 	  		for(i=9;i>=0;i--){
 
 	  			GPIOA->ODR=arrFND[i];
@@ -188,48 +193,11 @@ int main(void)
 	  		}
 	  		HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);//blue off
 	  		GPIOA->ODR=0;
+	  		state_=RED;
 	  			break;
 	  	default:
-
+	  		break;
 	  }
-
-	  /*
-	  switch(state){
-
-	  	  case false:
-	  		HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 1); //red off
-	  		HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 0); //blue on
-	  		//flag=1;
-	  		  break;
-
-	  	  case true:
-	  		  	  if(flag){
-
-
-	  				  for(i=9;i>=0;i--){
-
-	  					  GPIOA->ODR=arrFND[i];
-	  					  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);//blue off
-	  				  	  HAL_Delay(500);
-	  				  	  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 0);//blue on
-	  				  	  HAL_Delay(500);
-	  				  	}
-	  				  if(i<0){
-	  					  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1);//blue off
-	  					  HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 0); //red on
-	  					  GPIOA->ODR=0;
-	  					  flag=~flag;
-	  				  }
-	  			  }
-
-	  			  else{
-	  				  HAL_GPIO_WritePin(PB6_LED1_GPIO_Port, PB6_LED1_Pin, 0); //red on
-	  				  HAL_GPIO_WritePin(PB7_LED2_GPIO_Port, PB7_LED2_Pin, 1); //blue off
-	  			  }
-	  		  break;
-
-	  }
-	   	   */
 
 
 
